@@ -1,0 +1,329 @@
+<?xml version="1.0" encoding="utf-8"?>
+<profiles xmlns="http://www.logitech.com/Cassandra/2010.7/Profile">
+  <profile lastplayeddate="2018-06-29T20:26:26" gameid="" guid="{1100453E-75E4-4FB3-9E5A-6822AD95DFE5}" gpasupported="0" lock="1" launchable="1" gkeysdk="0" name="绝地求生">
+    <description></description>
+    <target path="C:\FASTER\GAME\STEAM\STEAMAPPS\COMMON\PUBG_TEST\TSLGAME\BINARIES\WIN64\TSLGAME.EXE"/>
+    <target path="C:\FASTER\GAME\STEAM\STEAMAPPS\COMMON\PUBG\TSLGAME\BINARIES\WIN64\TSLGAME.EXE"/>
+    <target path="C:\FASTER\GAME\STEAM\STEAMAPPS\COMMON\PUBG_EXPERIMENTAL\TSLGAME\BINARIES\WIN64\TSLGAME.EXE"/>
+    <signature key="" value="" name="" executable=""/>
+    <macros>
+      <macro guid="{5DAFA657-7E0B-4D37-9F7A-FA252ED551E6}" color="4278246655" original="true" name="左键单击" hidden="false">
+        <mousefunction xmlns="http://www.logitech.com/Cassandra/2010.1/Macros/MouseFunction">
+          <do task="leftclick"/>
+        </mousefunction>
+      </macro>
+      <macro guid="{9D0F4485-F6CE-49AF-B3FB-328DBF996F1E}" color="4278246655" original="true" name="右键单击" hidden="false">
+        <mousefunction xmlns="http://www.logitech.com/Cassandra/2010.1/Macros/MouseFunction">
+          <do task="rightclick"/>
+        </mousefunction>
+      </macro>
+      <macro guid="{6486FAA7-B82C-4C94-94CB-5A3598D6B202}" color="4278246655" name="N" hidden="false">
+        <keystroke xmlns="http://www.logitech.com/Cassandra/2010.1/Macros/Keystroke">
+          <key value="N"/>
+        </keystroke>
+      </macro>
+      <macro guid="{D589585A-FCEA-42DA-A02F-EC8665E4C23C}" color="4278246655" name="前进" hidden="false">
+        <mousefunction xmlns="http://www.logitech.com/Cassandra/2010.1/Macros/MouseFunction">
+          <do task="forward"/>
+        </mousefunction>
+      </macro>
+    </macros>
+    <assignments devicecategory="Logitech.Gaming.Mouse.G502RGB">
+      <assignment contextid="Button1" macroguid="{5DAFA657-7E0B-4D37-9F7A-FA252ED551E6}" backup="false" shiftstate="1" original="true"/>
+      <assignment contextid="Button2" macroguid="{9D0F4485-F6CE-49AF-B3FB-328DBF996F1E}" backup="false" shiftstate="1" original="true"/>
+      <assignment contextid="Button1" macroguid="{5DAFA657-7E0B-4D37-9F7A-FA252ED551E6}" backup="false" shiftstate="4" original="true"/>
+      <assignment contextid="Button2" macroguid="{9D0F4485-F6CE-49AF-B3FB-328DBF996F1E}" backup="false" shiftstate="4" original="true"/>
+      <assignment contextid="Button5" macroguid="{6486FAA7-B82C-4C94-94CB-5A3598D6B202}" backup="false" shiftstate="1" original="false"/>
+      <assignment contextid="Button4" macroguid="{6486FAA7-B82C-4C94-94CB-5A3598D6B202}" backup="false" shiftstate="1" original="false"/>
+      <assignment contextid="Button7" macroguid="{D589585A-FCEA-42DA-A02F-EC8665E4C23C}" backup="false" shiftstate="1" original="false"/>
+      <assignment contextid="Button8" macroguid="{D589585A-FCEA-42DA-A02F-EC8665E4C23C}" backup="false" shiftstate="1" original="false"/>
+      <assignment contextid="Button6" macroguid="{D589585A-FCEA-42DA-A02F-EC8665E4C23C}" backup="false" shiftstate="1" original="false"/>
+    </assignments>
+    <pointers>
+      <pointer devicemodel="Logitech.Gaming.Mouse.G502RGB">
+        <mode shiftstate="1">
+          <reportrate rate="1000"/>
+          <powermode value="2"/>
+          <dpitable defaultindex="2" shiftindex="0" syncxy="1">
+            <dpi x="400" y="400" enabled="1"/>
+            <dpi x="800" y="800" enabled="1"/>
+            <dpi x="1600" y="1600" enabled="1"/>
+            <dpi x="2400" y="2400" enabled="1"/>
+          </dpitable>
+          <movement speed="-1" acceleration="0"/>
+        </mode>
+      </pointer>
+    </pointers>
+    <backlight devicemodel="Logitech.Gaming.Mouse.G502RGB">
+      <lightingsetting><![CDATA[{"zones":{"1":{"color":"#ff0000","effectid":10,"intensity":100,"param":0,"rate":8000},"2":{"color":"#ff0000","effectid":10,"intensity":100,"param":0,"rate":8000}}}]]></lightingsetting>
+    </backlight>
+    <script>local pubg = {}
+-------------------------------------------------------------------------------
+-- 快捷键定义区域
+-------------------------------------------------------------------------------
+pubg.keyPickupWeapon = 0
+pubg.keyAlwayRun     = 0 -- 直接按键
+pubg.keyLookAround   = 0 -- alt + G + 定义
+pubg.keyWeaponUmp9   = 7 -- 定义
+pubg.keyWeaponAkm    = 9 -- 定义
+pubg.keyWeaponM16a4  = 8 -- 定义
+pubg.keyWeaponM416   = 9 -- G + 定义 ---------- 4倍
+pubg.keyDrop         = 0 -- G + 定义
+
+-------------------------------------------------------------------------------
+-- 变量定义区域
+-------------------------------------------------------------------------------
+-- 鼠标G键是否被按下
+pubg.isGKeyPressed = false
+-- 当鼠标G键被按下去之后，其他按钮是否被按下
+pubg.isOKeyPressed = false
+-- 当前选择的武器
+pubg.currentWeapon = "NIL"
+
+-------------------------------------------------------------------------------
+-- 随机函数，支出负数
+-------------------------------------------------------------------------------
+pubg.random = function (min, max)
+	local nMin = 1
+	local nMax = max - min
+	local randomNumber = math.random(nMin, nMax)
+	return randomNumber + min - 1
+end
+-- 移动函数
+function MoveFunc(x,y,w)
+	MoveMouseRelative(x,y);
+	Sleep(w);
+end
+-------------------------------------------------------------------------------
+-- 一件拾取装备 = 游戏中：从左边拉物品到武器栏中
+-------------------------------------------------------------------------------
+pubg.onPickupWeapon = function ()
+	local currentMouseX, currentMouseY = GetMousePosition()
+	PressMouseButton(1)
+	for i = 1, 5 do
+		MoveMouseRelative(pubg.random(100, 120), pubg.random(-10, 10))
+		Sleep(20)
+	end
+	ReleaseMouseButton(1)
+	Sleep(100)
+	MoveMouseTo(currentMouseX, currentMouseY)
+end
+
+-------------------------------------------------------------------------------
+-- 一键丢东西 = 游戏中：ctrl+拖放
+-------------------------------------------------------------------------------
+pubg.onDrop = function ()
+	local currentMouseX, currentMouseY = GetMousePosition()
+	PressMouseButton(1);Sleep(20)
+	for i = 1, 3 do
+		MoveMouseRelative(pubg.random(-126, -100), pubg.random(-10, 10))
+		Sleep(20)
+	end
+	ReleaseMouseButton(1)
+	Sleep(100)
+	MoveMouseTo(currentMouseX, currentMouseY)
+end
+
+-------------------------------------------------------------------------------
+-- 一键奔跑 = 游戏中：按=好
+-------------------------------------------------------------------------------
+pubg.onAlwayRun = function ()
+	PressKey(0x0d)
+	Sleep(400)
+	ReleaseKey(0x0d)
+end
+
+-------------------------------------------------------------------------------
+-- 自动环视周围
+-------------------------------------------------------------------------------
+pubg.onLookAround = function ()
+	PressMouseButton(1)
+	repeat
+		MoveMouseRelative(pubg.random(30, 70), pubg.random(-1, 2))
+		Sleep(20)
+	until not IsMouseButtonPressed(1)
+	ReleaseMouseButton(1)
+end
+
+-------------------------------------------------------------------------------
+-- 当单独的G键被按下
+-------------------------------------------------------------------------------
+pubg.onGKeyPressed = function ()
+	pubg.currentWeapon = "NIL"
+end
+
+-------------------------------------------------------------------------------
+-- 选择UMP9枪
+-------------------------------------------------------------------------------
+pubg.onWeaponUmp9 = function ()
+	local weaponRocilDatay = {20,20,20,20,20,20,20,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25,25};
+	local weaponRocilDatax = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	local weaponRocilDataWati = {3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3,3};
+	local weaponDuration   = 40
+	local currentRecoilPos = 1
+	repeat
+		PressAndReleaseKey("comma")
+		MoveFunc(weaponRocilDatax[currentRecoilPos],0*weaponRocilDatay[currentRecoilPos],weaponRocilDataWati[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		--OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilDatay then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择AKM枪
+-------------------------------------------------------------------------------
+pubg.onWeaponAkm = function ()
+	local weaponRocilDatay = {30,20,22,24,26,32,32,32,32,32,32,34,34,34,34,34,34,36,36,36,36,36,36,37,37,37,37,37,37,38,38,38,38,40,40,40,40,40,40,40};
+	local weaponRocilDatax = {0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0,0,2,0};
+	local weaponRocilDataWati = {15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15,15};
+	local weaponDuration   = 40
+	local currentRecoilPos = 1
+	repeat
+		PressAndReleaseKey("comma")
+		MoveFunc(weaponRocilDatax[currentRecoilPos],0.8*weaponRocilDatay[currentRecoilPos],weaponRocilDataWati[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		--OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilDatay then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择M16A4枪
+-------------------------------------------------------------------------------
+pubg.onWeaponM16a4 = function ()
+	local weaponRocilDatay = {17,20,22,24,24,28,28,28,28,28,30,32,32,32,32,32,32,32,32,32,32,33,33,33,33,33,34,34,34,34,34,34,34,34,34,34,34,34,34,34};
+	local weaponRocilDatax = {0,0,1,0,0,0,-1,0,0,1,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	local weaponRocilDataWati = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1};
+	local weaponDuration   = 50
+	local currentRecoilPos = 1
+	repeat
+		PressAndReleaseKey("comma")
+		MoveFunc(weaponRocilDatax[currentRecoilPos],0.9*weaponRocilDatay[currentRecoilPos],weaponRocilDataWati[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		--OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilDatay then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+-------------------------------------------------------------------------------
+-- 选择M416枪 --- 4倍
+-------------------------------------------------------------------------------
+pubg.onWeaponM416 = function ()
+	local weaponRocilDatay = {60,60,64,76,84,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92,92};
+	local weaponRocilDatax = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+	local weaponRocilDataWati = {11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11,11};
+	local weaponDuration   = 99
+	local currentRecoilPos = 1
+	repeat
+		PressAndReleaseKey("comma")
+		MoveFunc(weaponRocilDatax[currentRecoilPos],0.9*weaponRocilDatay[currentRecoilPos],weaponRocilDataWati[currentRecoilPos])
+		currentRecoilPos = currentRecoilPos + 1
+		Sleep(weaponDuration)
+		--OutputLogMessage(tostring(currentRecoilPos) .. " ")
+		if currentRecoilPos == #weaponRocilDatay then
+			currentRecoilPos = 1
+		end
+	until not IsMouseButtonPressed(1)
+end
+
+
+-------------------------------------------------------------------------------
+-- pubg逻辑处理
+-------------------------------------------------------------------------------
+pubg.onEvent = function (event, arg)
+	--OutputLogMessage("event = %s, arg = %d\n", event, arg)
+	
+	if event == "PROFILE_ACTIVATED" then
+		EnablePrimaryMouseButtonEvents(true)
+	elseif event == "PROFILE_DEACTIVATED" then
+		EnablePrimaryMouseButtonEvents(false)
+		pubg.currentWeapon = "NIL"
+		ReleaseKey(0x1d)
+		ReleaseMouseButton(1)
+		ReleaseMouseButton(2)
+		return
+	end
+	
+	-- G键按下逻辑
+	if event == "MOUSE_BUTTON_PRESSED" and arg == 6 then
+		pubg.isGKeyPressed = true
+		pubg.isOKeyPressed = false
+	elseif event == "MOUSE_BUTTON_RELEASED" and arg == 6 then
+		pubg.isGKeyPressed = false
+	end
+	
+	-- 在G键按下的时候，其他键是否被按下
+	if event == "MOUSE_BUTTON_PRESSED" and arg ~= 6 and pubg.isGKeyPressed then
+		pubg.isOKeyPressed = true
+	end
+	
+	-- 单独G键被按下
+	if event == "MOUSE_BUTTON_RELEASED" and arg == 6 and pubg.isOKeyPressed == false then
+		pubg.onGKeyPressed()
+		-- 一键拾取物品
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyPickupWeapon and pubg.isGKeyPressed == false then
+		pubg.onPickupWeapon()
+		-- 一键丢弃物品
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyDrop and pubg.isGKeyPressed == true then
+		pubg.onDrop()
+		-- 一键奔跑
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyAlwayRun and pubg.isGKeyPressed == false then
+		pubg.onAlwayRun()
+		-- 自动环视周围
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyLookAround and IsModifierPressed("alt") then
+		pubg.onLookAround()
+		-- 选择UMP9
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponUmp9 and pubg.isGKeyPressed == false then
+		pubg.currentWeapon = "UMP9"
+		-- 选择AKM
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponAkm and pubg.isGKeyPressed == false then
+		pubg.currentWeapon = "AKM"
+		-- 选择M16A4
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM16a4 and pubg.isGKeyPressed == false then
+		pubg.currentWeapon = "M16A4"
+		-- 选择M416
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == pubg.keyWeaponM416 and pubg.isGKeyPressed == true then
+		pubg.currentWeapon = "M416"
+		
+		-- 鼠标左键被按下
+	elseif event == "MOUSE_BUTTON_PRESSED" and arg == 1 then
+		if pubg.currentWeapon ~= "NIL" then
+			if pubg.currentWeapon == "UMP9" then
+				pubg.onWeaponUmp9()
+			elseif pubg.currentWeapon == "AKM" then
+				pubg.onWeaponAkm()
+			elseif pubg.currentWeapon == "M16A4" then
+				pubg.onWeaponM16a4()
+			elseif pubg.currentWeapon == "M416" then
+				pubg.onWeaponM416()
+			end
+		elseif pubg.currentWeapon == "NIL" then
+			PressKey("comma")
+		end
+	end
+
+	-- 左键抬起
+	if (event == "MOUSE_BUTTON_RELEASED" and arg == 1) then
+		ReleaseKey("comma")
+	end
+end
+
+
+-------------------------------------------------------------------------------
+-- 驱动入口函数
+-------------------------------------------------------------------------------
+function OnEvent(event, arg)
+	pubg.onEvent(event, arg)
+end</script>
+  </profile>
+</profiles>
